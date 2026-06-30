@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Parts Inventory</title>
+  <link rel="icon" type="image/jpeg" href="https://static.vecteezy.com/system/resources/previews/009/645/252/non_2x/gear-and-wrench-icon-logo-illustration-service-tool-symbol-template-for-graphic-and-web-design-collection-free-vector.jpg">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    .logo-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .site-logo {
+      max-width: 140px;
+      width: 100%;
+      height: auto;
+      display: inline-block;
+      border-radius: 12px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+    }
+
+    button {
+      padding: 10px;
+      width: 100%;
+      background: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #218838;
+    }
+
+    .cancel-btn {
+      background: #6c757d;
+      margin-top: 10px;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+
+    .delete-btn {
+      background: red;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    .update-btn {
+      background: orange;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="logo-container">
+    <a href="https://www.vecteezy.com/vector-art/9645252-gear-and-wrench-icon-logo-vector-illustration-service-tool-symbol-template-for-graphic-and-web-design-collection" target="_blank" rel="noopener noreferrer">
+      <img class="site-logo" src="https://static.vecteezy.com/system/resources/previews/009/645/252/non_2x/gear-and-wrench-icon-logo-illustration-service-tool-symbol-template-for-graphic-and-web-design-collection-free-vector.jpg" alt="Gear and wrench logo">
+    </a>
+  </div>
+  <h2>Parts Information System</h2>
+
+  <input type="text" id="partName" placeholder="Part Name">
+  <input type="number" id="partQty" placeholder="Quantity">
+  <select id="storageLocation">
+    <option value="">Select Storage Shelf</option>
+    <option value="Shelf 1">Shelf 1</option>
+    <option value="Shelf 2">Shelf 2</option>
+  </select>
+
+  <button id="saveButton" onclick="savePart()">Add Part</button>
+  <button id="cancelButton" class="cancel-btn" onclick="cancelEdit()" style="display:none">Cancel Edit</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Quantity</th>
+        <th>Storage</th>
+        <th>Action</th>
+        <th>Update</th>
+      </tr>
+    </thead>
+    <tbody id="partsTable"></tbody>
+  </table>
+</div>
+
+<script>
+  let parts = JSON.parse(localStorage.getItem("parts")) || [];
+  let editIndex = null;
+
+  function renderParts() {
+    const table = document.getElementById("partsTable");
+    table.innerHTML = "";
+
+    parts.forEach((part, index) => {
+      table.innerHTML += `
+        <tr>
+          <td>${part.name}</td>
+          <td>${part.qty}</td>
+          <td>${part.storage || "-"}</td>
+          <td><button class="delete-btn" onclick="deletePart(${index})">Delete</button></td>
+          <td><button class="update-btn" onclick="startEdit(${index})">Edit</button></td>
+        </tr>
+      `;
+    });
+
+    localStorage.setItem("parts", JSON.stringify(parts));
+  }
+
+  function resetForm() {
+    document.getElementById("partName").value = "";
+    document.getElementById("partQty").value = "";
+    document.getElementById("storageLocation").value = "";
+    editIndex = null;
+    document.getElementById("saveButton").textContent = "Add Part";
+    document.getElementById("cancelButton").style.display = "none";
+  }
+
+  function savePart() {
+    const name = document.getElementById("partName").value.trim();
+    const qty = document.getElementById("partQty").value.trim();
+    const storage = document.getElementById("storageLocation").value;
+
+    if (!name || !qty || !storage) {
+      alert("Please fill all fields and select a storage location!");
+      return;
+    }
+
+    if (editIndex !== null) {
+      parts[editIndex] = { name, qty, storage };
+    } else {
+      parts.push({ name, qty, storage });
+    }
+
+    resetForm();
+    renderParts();
+  }
+
+  function deletePart(index) {
+    parts.splice(index, 1);
+    renderParts();
+
+    if (editIndex === index) {
+      resetForm();
+    }
+  }
+
+  function startEdit(index) {
+    const part = parts[index];
+
+    document.getElementById("partName").value = part.name;
+    document.getElementById("partQty").value = part.qty;
+    document.getElementById("storageLocation").value = part.storage || "";
+    editIndex = index;
+    document.getElementById("saveButton").textContent = "Save Changes";
+    document.getElementById("cancelButton").style.display = "block";
+  }
+
+  function cancelEdit() {
+    resetForm();
+  }
+
+  // initial load
+  resetForm();
+  renderParts();
+</script>
+
+</body>
+</html>
